@@ -1,0 +1,9 @@
+D:\Projects\AnimalChess\AnimalChess\bin\Debug\AnimalChess.exe.config
+D:\Projects\AnimalChess\AnimalChess\bin\Debug\AnimalChess.exe
+D:\Projects\AnimalChess\AnimalChess\bin\Debug\AnimalChess.pdb
+D:\Projects\AnimalChess\AnimalChess\obj\Debug\AnimalChess.csprojAssemblyReference.cache
+D:\Projects\AnimalChess\AnimalChess\obj\Debug\AnimalChess.Form1.resources
+D:\Projects\AnimalChess\AnimalChess\obj\Debug\AnimalChess.Properties.Resources.resources
+D:\Projects\AnimalChess\AnimalChess\obj\Debug\AnimalChess.csproj.GenerateResource.cache
+D:\Projects\AnimalChess\AnimalChess\obj\Debug\AnimalChess.exe
+D:\Projects\AnimalChess\AnimalChess\obj\Debug\AnimalChess.pdb
