@@ -371,7 +371,7 @@ namespace AnimalChess {
 
             if (giliran == ai.giliran) {
                 //call minimax
-                int depth = 10;
+                int depth = 3;
                 int playerKe = ai.giliran;
                 Box[,] papanBaru = DeepCopy(papan);
                 (Move, int) m = MiniMax(papanBaru, depth, playerKe, new Move(papanBaru));
