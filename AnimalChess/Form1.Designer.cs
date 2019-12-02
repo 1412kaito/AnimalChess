@@ -27,6 +27,9 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.labelGiliran = new System.Windows.Forms.ToolStripMenuItem();
             this.gantiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.atasPVAIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.atasAIVPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.redrawToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -44,7 +47,10 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.labelGiliran,
-            this.gantiToolStripMenuItem});
+            this.gantiToolStripMenuItem,
+            this.atasPVAIToolStripMenuItem,
+            this.atasAIVPToolStripMenuItem,
+            this.redrawToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(800, 24);
@@ -63,6 +69,27 @@
             this.gantiToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
             this.gantiToolStripMenuItem.Text = "ganti";
             this.gantiToolStripMenuItem.Click += new System.EventHandler(this.gantiGiliran);
+            // 
+            // atasPVAIToolStripMenuItem
+            // 
+            this.atasPVAIToolStripMenuItem.Name = "atasPVAIToolStripMenuItem";
+            this.atasPVAIToolStripMenuItem.Size = new System.Drawing.Size(78, 20);
+            this.atasPVAIToolStripMenuItem.Text = "[atas]P v AI";
+            this.atasPVAIToolStripMenuItem.Click += new System.EventHandler(this.atasPVAIToolStripMenuItem_Click);
+            // 
+            // atasAIVPToolStripMenuItem
+            // 
+            this.atasAIVPToolStripMenuItem.Name = "atasAIVPToolStripMenuItem";
+            this.atasAIVPToolStripMenuItem.Size = new System.Drawing.Size(78, 20);
+            this.atasAIVPToolStripMenuItem.Text = "[atas]AI v P";
+            this.atasAIVPToolStripMenuItem.Click += new System.EventHandler(this.atasAIVPToolStripMenuItem_Click);
+            // 
+            // redrawToolStripMenuItem
+            // 
+            this.redrawToolStripMenuItem.Name = "redrawToolStripMenuItem";
+            this.redrawToolStripMenuItem.Size = new System.Drawing.Size(55, 20);
+            this.redrawToolStripMenuItem.Text = "redraw";
+            this.redrawToolStripMenuItem.Click += new System.EventHandler(this.redrawToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -86,6 +113,9 @@
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem labelGiliran;
         private System.Windows.Forms.ToolStripMenuItem gantiToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem atasPVAIToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem atasAIVPToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem redrawToolStripMenuItem;
     }
 }
 
