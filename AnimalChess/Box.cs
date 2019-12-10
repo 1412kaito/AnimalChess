@@ -24,14 +24,14 @@ namespace AnimalChess {
                 isAlive = true;
             }
             override public string ToString() {
-                return this.nama + " - " + this.position;
+                return this.nama + " - " + this.position + " - "+ player;
             }
         }
 
         public Piece animal;
         public bool isTrap, isDen, isWater;
-        public int denOwner;
-        public int trapOwner;
+        public int denOwner = -1;
+        public int trapOwner = -1;
 
         public Box() {
             animal = null;
@@ -46,6 +46,8 @@ namespace AnimalChess {
             }
         }
 
-        
+        public override string ToString() {
+            return $"Animal: {this.animal}\nisTrap: {isTrap}\nisDen: {isDen}\nisWater: {isWater}\ntrapOwner:{trapOwner}\ndenOwner:{denOwner}";
+        }
     }
 }

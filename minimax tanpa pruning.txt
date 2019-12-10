@@ -1,0 +1,123 @@
+        private (Move, int) MiniMax(Box[,] peta, int depth, int playerSekarang, Move sebelumnya) {
+            if (depth == 0) {
+                int value = 0;
+
+                Box[,] copyPeta = sebelumnya.currentMap;
+                List<Box.Piece> myPieces, enemyPieces;
+                myPieces = new List<Box.Piece>(); enemyPieces = new List<Box.Piece>();
+
+                for (int y = 0; y < 9; y++) {
+                    for (int x = 0; x < 7; x++) {
+                        Box currentPiece = copyPeta[x, y];
+                        if (currentPiece.animal != null) {
+                            if (currentPiece.animal.player == giliran) {
+                                myPieces.Add(currentPiece.animal);
+                            }
+                            else {
+                                enemyPieces.Add(currentPiece.animal);
+                            }
+                        }
+                    }
+                }
+
+                value += ((myPieces.Count - enemyPieces.Count) * 100);
+
+                int jarakX = int.MinValue, jarakY = int.MinValue;
+                int dx = int.MaxValue, dy = int.MaxValue;
+                foreach (Box.Piece item in myPieces) {
+                    
+                    jarakX = 3 - item.position.Item1;
+                    jarakX = Math.Abs(jarakX);
+                    if (ai.giliran == 1) {
+                        jarakY = Math.Abs(8 - item.position.Item2);
+                    } else {
+                        jarakY = Math.Abs(0 - item.position.Item2);
+                    }
+                    if (jarakY == jarakX  &&  jarakX == 0) {
+                        value = int.MaxValue;
+                        return (sebelumnya, value);
+                    }
+                    else {
+                        if (dx > jarakX) dx = jarakX;
+                        if (dy > jarakY) dy = jarakY;
+                    }
+                }
+
+                value += ( ((jarakX + jarakY)/2) * -1);
+
+                return (sebelumnya, value);
+            } else {
+
+                List<Box.Piece> akanGerak = new List<Box.Piece>();int ctr = 0;
+                for (int y = 0; y < 9; y++) {
+                    for (int x = 0; x < 7; x++) {
+                        Box petak = peta[x, y];
+                        if (petak.animal != null) {
+                            if (petak.animal.isAlive && petak.animal.player == playerSekarang && petak.animal.position.Equals(CoordsOf(peta, petak).ToValueTuple())) {
+                                akanGerak.Add(petak.animal);
+                                ++ctr;           
+                            }
+                        }
+                    }
+                }
+
+                List<Box[,]> papans = new List<Box[,]>();
+                foreach (Box.Piece myAnimal in akanGerak) {
+                    var possibleMoves = AtasBawahKiriKanan(myAnimal.position, peta);
+                    foreach (var move in possibleMoves) {
+                        Box[,] temp = DeepCopy(peta);
+                        int x = myAnimal.position.Item1;
+                        int y = myAnimal.position.Item2;
+                        if (move.Key.ToLowerInvariant().Equals("atas".ToLowerInvariant())) {
+                            cobaGerakKeAtas(papans, myAnimal, temp, x, y);
+                        }
+                        else if (move.Key.ToLowerInvariant().Equals("kanan".ToLowerInvariant())) {
+                            cobaGerakKeKanan(papans, myAnimal, temp, x, y);
+                        }
+                        else if (move.Key.ToLowerInvariant().Equals("bawah".ToLowerInvariant())) {
+                            cobaGerakKeBawah(papans, myAnimal, temp, x, y);
+                        }
+                        else if (move.Key.ToLowerInvariant().Equals("kiri".ToLowerInvariant())) {
+                            cobaGerakKeKiri(papans, myAnimal, temp, x, y);
+                        }
+                        
+                    }
+                }
+
+                List<(Move, int)> moves = new List<(Move, int)>();
+                foreach (var item in papans) {
+                    Box[,] baru = DeepCopy(item);
+                    Move moveSekarang = new Move(baru); moveSekarang.next = sebelumnya;
+                    moves.Add(MiniMax(baru, depth-1, (playerSekarang%2)+1, moveSekarang));
+                }
+
+                (Move, int) kembalian = default;
+                if (playerSekarang == giliran) {
+                    //MAX of MiniMax
+                    int temp = int.MinValue;
+                    foreach (var item in moves) {
+                        if (item.Item2 > temp) {
+                            //Console.Write(" ganti max ");
+                            temp = item.Item2;
+                            kembalian = item;
+                        } else if (item.Item2 == temp) {
+                            //Console.Write(" max sama");
+                        }
+                    }
+                } else {
+                    //MIN of MiniMax
+                    int temp = int.MaxValue;
+                    foreach (var item in moves) {
+                        if (item.Item2 < temp) {
+                            //Console.Write(" ganti min");
+                            temp = item.Item2;
+                            kembalian = item;
+                        } else if (item.Item2 == temp) {
+                            //Console.Write(" min sama");
+                        }
+                    }
+                }
+                //Console.WriteLine();
+                return kembalian;
+            }
+        }
