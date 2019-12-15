@@ -559,15 +559,14 @@ namespace AnimalChess {
             Box cek = temp[x - 1, y];
             if (cek.isDen && cek.denOwner == myAnimal.player) { /*MessageBox.Show("den sendiri left");*/ }
             else {
-                if (cek.animal == null && !cek.isWater) {
+                if (cek.animal == null) {
+                    if (!cek.isWater) {
                     cek.animal = temp[x, y].animal;
                     cek.animal.position = (x - 1, y);
                     temp[x, y].animal = null;
                     papans.Add(temp);
                 }
                 else {
-                    if (cek.animal == null) {
-                        if (cek.isWater) {
                             if (myAnimal.strength == 6 || myAnimal.strength == 5) {
                                 if (temp[x - 2, y].animal == null) {
                                     if (temp[x - 3, y].animal == null) {
@@ -576,8 +575,7 @@ namespace AnimalChess {
                                         temp[x, y].animal = null;
                                         papans.Add(temp);
                                     }
-                                    else
-                                    if (temp[x - 3, y].animal.player != myAnimal.player && temp[x - 3, y].animal.strength < myAnimal.strength) {
+                                else if (temp[x - 3, y].animal.player != myAnimal.player && temp[x - 3, y].animal.strength < myAnimal.strength) {
                                         temp[x - 3, y].removeAnimal();
                                         temp[x - 3, y].animal = temp[x, y].animal;
                                         temp[x - 3, y].animal.position = (x - 3, y);
@@ -586,19 +584,28 @@ namespace AnimalChess {
                                     }
                                 }
                             }
+                        else if (myAnimal.strength == 0) {
+                            cek.animal = temp[x, y].animal;
+                            temp[x, y].animal = null;
+                            cek.animal.position = (x - 1, y);
+                            papans.Add(temp);
+                        } else {
+                            //Console.WriteLine(myAnimal.strength);
                         }
                     }
+                    }
                     else {
-                        if (myAnimal.player != cek.animal.player && cek.isWater == temp[x, y].isWater) {
+                    if ((myAnimal.player != cek.animal.player) && (cek.isWater == temp[x, y].isWater)) {
                             if (cek.isTrap && cek.trapOwner == myAnimal.player) {
                                 cek.removeAnimal();
-                                cek.animal = myAnimal;
+                            cek.animal = temp[x, y].animal;
                                 temp[x, y].animal = null;
 
                                 myAnimal.position = CoordsOf(temp, cek).ToValueTuple();
                                 papans.Add(temp);
                             }
-                            else if (myAnimal.strength == 0 && cek.animal.strength == 7) {
+                        else {
+                            if (myAnimal.strength == 0 && cek.animal.strength == 7) {
                                 cek.removeAnimal();
                                 cek.animal = temp[x, y].animal;
                                 cek.animal.position = (x - 1, y);
@@ -608,12 +615,15 @@ namespace AnimalChess {
                             else if (myAnimal.strength == 7 && cek.animal.strength == 0) {
                                 //gaboleh gajah makan tikus
                             }
-                            else if (cek.animal.strength <= myAnimal.strength) {
+                            else {
+                                if (cek.animal.strength <= myAnimal.strength) {
                                 cek.removeAnimal();
                                 cek.animal = temp[x, y].animal;
                                 cek.animal.position = (x - 1, y);
                                 temp[x, y].animal = null;
                                 papans.Add(temp);
+
+                                }
                             }
                         }
                     }
