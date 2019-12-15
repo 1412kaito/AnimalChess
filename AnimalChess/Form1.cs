@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -22,6 +17,8 @@ namespace AnimalChess {
         private int giliran = 1;
         private Box first;
         private Box.Piece clicked = null;
+        private int callCounter = 0;
+        private readonly int DEPTH = 1;
         //private Dictionary<string, Box> around;
 
         private const int BOX_SIZE = 75;
@@ -72,32 +69,25 @@ namespace AnimalChess {
             papan[5, 1].animal = new Box.Piece(1, 1);
             papan[4, 2].animal = new Box.Piece(2, 1);
             papan[1, 1].animal = new Box.Piece(3, 1);
-            
             papan[2, 2].animal = new Box.Piece(4, 1);
             papan[6, 0].animal = new Box.Piece(5, 1);
             papan[0, 0].animal = new Box.Piece(6, 1);
             papan[6, 2].animal = new Box.Piece(7, 1);
-
             papan[0, 6].animal = new Box.Piece(7, 2);
             papan[5, 7].animal = new Box.Piece(3, 2);
             papan[4, 6].animal = new Box.Piece(4, 2);
             papan[1, 7].animal = new Box.Piece(1, 2); 
-
             papan[2, 6].animal = new Box.Piece(2, 2);  
             papan[6, 8].animal = new Box.Piece(6, 2);
             papan[0, 8].animal = new Box.Piece(5, 2);
             papan[6, 6].animal = new Box.Piece(0, 2);
-
             papan[0, 2].animal.position = (0, 2);
             papan[5, 1].animal.position = (5, 1);
             papan[4, 2].animal.position = (4, 2);
             papan[1, 1].animal.position = (1, 1);
             papan[2, 2].animal.position = (2, 2);
             papan[6, 0].animal.position = (6, 0);
-            
             papan[0, 0].animal.position = (0, 0);
-            
-            
             papan[6, 2].animal.position = (6, 2);
             papan[0, 6].animal.position = (0, 6);
             papan[5, 7].animal.position = (5, 7);
@@ -107,6 +97,20 @@ namespace AnimalChess {
             papan[6, 8].animal.position = (6, 8);
             papan[0, 8].animal.position = (0, 8);
             papan[6, 6].animal.position = (6, 6);
+
+
+            //debugging
+            //papan[5,6].animal = new Box.Piece(0, 1);
+
+
+            //papan[5, 6].animal.position = (5, 6);
+
+
+            //papan[5, 7].animal = new Box.Piece(5, 2);
+            //papan[4, 6].animal = new Box.Piece(5, 2);
+
+            //papan[4, 6].animal.position = (4, 6);
+            //papan[5, 7].animal.position = (5, 7);
 
             displayPapan();
         }
@@ -209,8 +213,8 @@ namespace AnimalChess {
                                                     papan[cX, cY - 3].animal = clicked;
                                                     clicked.position = (cX, cY - 3);
                                                     clicked = null;
-                                                }
                                                 gantiGiliran(sender, e);
+                                                }
                                                 break;
                                             case "bawah":
                                                 if (bisaNyebrangKeBawah(cX, cY, second)) {
@@ -220,8 +224,8 @@ namespace AnimalChess {
                                                     clicked.position = (cX, cY + 3);
                                                     //MessageBox.Show(clicked.position.ToString());
                                                     clicked = null;
-                                                }
                                                 gantiGiliran(sender, e);
+                                                }
                                                 break;
                                             case "kiri":
                                                 if (bisaNyebrangKeKiri(cX, cY, second)) {
@@ -230,8 +234,9 @@ namespace AnimalChess {
                                                     papan[cX - 2, cY].animal = clicked;
                                                     papan[cX - 2, cY].animal.position = (cX - 2, cY);
                                                     clicked = null;
-                                                }
                                                 gantiGiliran(sender, e);
+
+                                                }
                                                 break;
                                             case "kanan":
                                                 if (bisaNyebrangKeKanan(cX, cY, second)) {
@@ -241,8 +246,9 @@ namespace AnimalChess {
                                                     papan[cX + 2, cY].animal.position = (cX + 2, cY);
                                                     //MessageBox.Show(clicked.position.ToString());
                                                     clicked = null;
-                                                }
                                                 gantiGiliran(sender, e);
+
+                                                }
                                                 break;
                                         }
                                     }
@@ -255,8 +261,8 @@ namespace AnimalChess {
                                     clicked = null;
                                     first.animal = null;
                                     second.animal.position = CoordsOf(papan, second).ToValueTuple();
-                                }
                                 gantiGiliran(sender, e);
+                                }
                                 break;
                         }
                         displayPapan();
@@ -382,27 +388,22 @@ namespace AnimalChess {
 
             if (giliran == ai.giliran) {
                 //call minimax
-                int depth = 3;
+                int depth = DEPTH;
                 int playerKe = ai.giliran;
                 Box[,] papanBaru = DeepCopy(papan);
+
+                System.Diagnostics.Stopwatch stopwatch = new Stopwatch();
+                callCounter = 0;
+                Console.WriteLine("START!");
+                stopwatch.Start();
                 (Move, int) m = MiniMax(papanBaru, depth, playerKe, new Move(papanBaru), int.MinValue, int.MaxValue);
+                stopwatch.Stop();
                 //do best move
                 Move t = m.Item1;
                 //if (m.Item2 == int.MaxValue) MessageBox.Show("SAMPAI");
+                if (t.next != null) {
                 while (t.next.next != null) {
-                    //Console.WriteLine("MAPPPPP");
-                    //for (int y = 0; y < 9; y++) {
-                    //    for (int x = 0; x < 7; x++) {
-                    //        Box current = t.currentMap[x, y];
-                    //        string character = ".";
-                    //        if (current.isDen) character = "d";
-                    //        if (current.isTrap) character = "t";
-                    //        if (current.isWater) character = "w";
-                    //        if (current.animal != null) character = current.animal.strength.ToString();
-                    //        Console.Write(character);
-                    //    }
-                    //    Console.WriteLine();
-                    //}
+                        Console.WriteLine(t.currentMap);
                     if (t.next != null) {
                         t = t.next;
                     }
@@ -410,23 +411,22 @@ namespace AnimalChess {
                         break;
                     }
                 }
+                }
                 if (t != null) {
                     papan = t.currentMap;
                     ambilPiecesYangMasihHidup();
                     giliran %= 2;
                     giliran++;
                 }
+                Console.WriteLine("TIME:" +stopwatch.Elapsed);
+                Console.WriteLine("CALL COUNT:" +callCounter);
             }
             displayPapan();
         }
 
-        Random r = new Random();
-        //sisa move, maxim atau minim
-
-
         //call MiniMax(map, 3, giliran, moves, int.MinValue, int.MaxValue)
-
         private (Move, int) MiniMax(Box[,] peta, int depth, int playerSekarang, Move sebelumnya, int alfa, int beta) {
+            callCounter++;
             if (depth == 0) {
                 int value = 0;
 
@@ -439,19 +439,21 @@ namespace AnimalChess {
                         Box currentPiece = copyPeta[x, y];
                         if (currentPiece.animal != null) {
                             if (currentPiece.animal.player == giliran) {
+                                value += currentPiece.animal.getValue();
                                 myPieces.Add(currentPiece.animal);
                             }
                             else {
+                                value -= currentPiece.animal.getValue();
                                 enemyPieces.Add(currentPiece.animal);
                             }
                         }
                     }
                 }
 
-                value += ((myPieces.Count - enemyPieces.Count) * 100);
+                value += ((myPieces.Count - enemyPieces.Count)*50);
 
-                int jarakX = int.MinValue, jarakY = int.MinValue;
-                int dx = int.MaxValue, dy = int.MaxValue;
+                int jarakX = int.MaxValue, jarakY = int.MaxValue;
+                int distance = int.MaxValue;
                 foreach (Box.Piece item in myPieces) {
 
                     jarakX = 3 - item.position.Item1;
@@ -462,76 +464,91 @@ namespace AnimalChess {
                     else {
                         jarakY = Math.Abs(0 - item.position.Item2);
                     }
+
                     if (jarakY == jarakX && jarakX == 0) {
                         value = int.MaxValue;
                         return (sebelumnya, value);
                     }
                     else {
-                        if (dx > jarakX) dx = jarakX;
-                        if (dy > jarakY) dy = jarakY;
+                        int currentDistance = jarakX + jarakY;
+                        if (currentDistance < distance) {
+                            distance = currentDistance;
                     }
                 }
+                }
 
-                value += (((jarakX + jarakY) / 2) * -1);
+                value += ((distance * -1) * 25);
 
                 return (sebelumnya, value);
             }
             else {
-
-                List<Box.Piece> akanGerak = new List<Box.Piece>(); int ctr = 0;
+                List<Box.Piece> akanGerak = new List<Box.Piece>(); 
                 for (int y = 0; y < 9; y++) {
                     for (int x = 0; x < 7; x++) {
                         Box petak = peta[x, y];
                         if (petak.animal != null) {
-                            if (petak.animal.isAlive && petak.animal.player == playerSekarang && petak.animal.position.Equals(CoordsOf(peta, petak).ToValueTuple())) {
+                            if (petak.animal.isAlive && petak.animal.player == playerSekarang) {
                                 akanGerak.Add(petak.animal);
-                                ++ctr;
                             }
                         }
                     }
                 }
 
                 List<Box[,]> papans = new List<Box[,]>();
-                foreach (Box.Piece myAnimal in akanGerak) {
-                    var possibleMoves = AtasBawahKiriKanan(myAnimal.position, peta);
+                foreach (Box.Piece currentAnimal in akanGerak) {
+                    var possibleMoves = AtasBawahKiriKanan(currentAnimal.position, peta);
                     foreach (var move in possibleMoves) {
-                        Box[,] temp = DeepCopy(peta);
-                        int x = myAnimal.position.Item1;
-                        int y = myAnimal.position.Item2;
-                        if (move.Key.ToLowerInvariant().Equals("atas".ToLowerInvariant())) {
-                            cobaGerakKeAtas(papans, myAnimal, temp, x, y);
+                        int x = currentAnimal.position.Item1;
+                        int y = currentAnimal.position.Item2;
+                        if (move.Key.ToLowerInvariant().Equals("bawah".ToLowerInvariant())) {
+                            cobaGerakKeBawah(papans, currentAnimal, DeepCopy(peta), x, y);
                         }
                         else if (move.Key.ToLowerInvariant().Equals("kanan".ToLowerInvariant())) {
-                            cobaGerakKeKanan(papans, myAnimal, temp, x, y);
+                            cobaGerakKeKanan(papans, currentAnimal, DeepCopy(peta), x, y);
                         }
-                        else if (move.Key.ToLowerInvariant().Equals("bawah".ToLowerInvariant())) {
-                            cobaGerakKeBawah(papans, myAnimal, temp, x, y);
+                        else if (move.Key.ToLowerInvariant().Equals("atas".ToLowerInvariant())) {
+                            cobaGerakKeAtas(papans, currentAnimal, DeepCopy(peta), x, y);
                         }
                         else if (move.Key.ToLowerInvariant().Equals("kiri".ToLowerInvariant())) {
-                            cobaGerakKeKiri(papans, myAnimal, temp, x, y);
+                            cobaGerakKeKiri(papans, currentAnimal, DeepCopy(peta), x, y);
                         }
 
                     }
                 }
 
                 (Move, int) kembalian = default;
+
+                int bestMoveValue;
+                if (playerSekarang == giliran)
+                    bestMoveValue = int.MinValue;
+                else
+                    bestMoveValue = int.MaxValue;
                 foreach (var item in papans) {
+
                     Box[,] baru = DeepCopy(item);
-                    Move moveSekarang = new Move(baru); moveSekarang.next = sebelumnya;
+                    Move moveSekarang = new Move(baru); 
+                    moveSekarang.next = sebelumnya;
+
                     var penampung = MiniMax(baru, depth - 1, (playerSekarang % 2) + 1, moveSekarang, alfa, beta);
-                    if (kembalian == default)
-                        kembalian = penampung;
 
                     if (playerSekarang == giliran) {
                         //MAX of MiniMax
+
+                        if (bestMoveValue < penampung.Item2) {
+                            bestMoveValue = penampung.Item2;
+                            kembalian = penampung;
+                        }
                         if (alfa < penampung.Item2) {
                             alfa = penampung.Item2;
                             kembalian = penampung;
-                            Console.WriteLine("swap");
                         }
                     }
                     else {
                         //MIN of MiniMax
+                        if (bestMoveValue > penampung.Item2) {
+                            bestMoveValue = penampung.Item2;
+                            kembalian = penampung;
+                        }
                         if (beta > penampung.Item2) {
                             beta = penampung.Item2;
                             kembalian = penampung;
@@ -550,46 +567,53 @@ namespace AnimalChess {
             Box cek = temp[x - 1, y];
             if (cek.isDen && cek.denOwner == myAnimal.player) { /*MessageBox.Show("den sendiri left");*/ }
             else {
-                if (cek.animal == null && !cek.isWater) {
+                if (cek.animal == null) {
+                    if (!cek.isWater) {
                     cek.animal = temp[x, y].animal;
                     cek.animal.position = (x - 1, y);
                     temp[x, y].animal = null;
                     papans.Add(temp);
-                }
-                else {
-                    if (cek.animal == null) {
-                        if (cek.isWater) {
-                            if (myAnimal.strength == 6 || myAnimal.strength == 5) {
-                                if (temp[x - 2, y].animal == null) {
-                                    if (temp[x - 3, y].animal == null) {
-                                        temp[x - 3, y].animal = temp[x, y].animal;
-                                        temp[x - 3, y].animal.position = (x - 3, y);
-                                        temp[x, y].animal = null;
-                                        papans.Add(temp);
-                                    }
-                                    else
-                                    if (temp[x - 3, y].animal.player != myAnimal.player && temp[x - 3, y].animal.strength < myAnimal.strength) {
-                                        temp[x - 3, y].removeAnimal();
-                                        temp[x - 3, y].animal = temp[x, y].animal;
-                                        temp[x - 3, y].animal.position = (x - 3, y);
-                                        temp[x, y].animal = null;
-                                        papans.Add(temp);
-                                    }
+                    }
+                    else {
+                        if (myAnimal.strength == 6 || myAnimal.strength == 5) {
+                            if (temp[x - 2, y].animal == null) {
+                                if (temp[x - 3, y].animal == null) {
+                                    temp[x - 3, y].animal = temp[x, y].animal;
+                                    temp[x - 3, y].animal.position = (x - 3, y);
+                                    temp[x, y].animal = null;
+                                    papans.Add(temp);
+                                }
+                            else if (temp[x - 3, y].animal.player != myAnimal.player && temp[x - 3, y].animal.strength < myAnimal.strength) {
+                                    temp[x - 3, y].removeAnimal();
+                                    temp[x - 3, y].animal = temp[x, y].animal;
+                                    temp[x - 3, y].animal.position = (x - 3, y);
+                                    temp[x, y].animal = null;
+                                    papans.Add(temp);
                                 }
                             }
                         }
+                        else if (myAnimal.strength == 0) {
+                            cek.animal = temp[x, y].animal;
+                            temp[x, y].animal = null;
+                            cek.animal.position = (x - 1, y);
+                            papans.Add(temp);
+                        } 
+                        else {
+                            //Console.WriteLine(myAnimal.strength);
+                        }
                     }
-                    else {
-                        if (myAnimal.player != cek.animal.player && cek.isWater == temp[x, y].isWater) {
-                            if (cek.isTrap && cek.trapOwner == myAnimal.player) {
-                                cek.removeAnimal();
-                                cek.animal = myAnimal;
-                                temp[x, y].animal = null;
-
-                                myAnimal.position = CoordsOf(temp, cek).ToValueTuple();
-                                papans.Add(temp);
-                            }
-                            else if (myAnimal.strength == 0 && cek.animal.strength == 7) {
+                }
+                else {
+                    if ((myAnimal.player != cek.animal.player) && (cek.isWater == temp[x, y].isWater)) {
+                        if (cek.isTrap && cek.trapOwner == myAnimal.player) {
+                            cek.removeAnimal();
+                            cek.animal = temp[x, y].animal;
+                            temp[x, y].animal = null;
+                            myAnimal.position = CoordsOf(temp, cek).ToValueTuple();
+                            papans.Add(temp);
+                        }
+                        else {
+                            if (myAnimal.strength == 0 && cek.animal.strength == 7) {
                                 cek.removeAnimal();
                                 cek.animal = temp[x, y].animal;
                                 cek.animal.position = (x - 1, y);
@@ -599,12 +623,14 @@ namespace AnimalChess {
                             else if (myAnimal.strength == 7 && cek.animal.strength == 0) {
                                 //gaboleh gajah makan tikus
                             }
-                            else if (cek.animal.strength <= myAnimal.strength) {
-                                cek.removeAnimal();
-                                cek.animal = temp[x, y].animal;
-                                cek.animal.position = (x - 1, y);
-                                temp[x, y].animal = null;
-                                papans.Add(temp);
+                            else {
+                                if (cek.animal.strength <= myAnimal.strength) {
+                                    cek.removeAnimal();
+                                    cek.animal = temp[x, y].animal;
+                                    cek.animal.position = (x - 1, y);
+                                    temp[x, y].animal = null;
+                                    papans.Add(temp);
+                                }
                             }
                         }
                     }
@@ -616,61 +642,64 @@ namespace AnimalChess {
             Box cek = temp[x + 1, y];
             if (cek.isDen && cek.denOwner == myAnimal.player) { /*MessageBox.Show("den sendiri right"); */}
             else {
-                if (cek.animal == null && !cek.isWater) {
-                    cek.animal = temp[x, y].animal;
-                    cek.animal.position = (x + 1, y);
-                    temp[x, y].animal = null;
-                    papans.Add(temp);
-                }
-                else {
-                    if (cek.animal == null) {
-                        if (cek.isWater) {
-                            if (myAnimal.strength == 6 || myAnimal.strength == 5) {
-                                if (temp[x + 2, y].animal == null) {
-                                    if (temp[x + 3, y].animal == null) {
-                                        temp[x + 3, y].animal = temp[x, y].animal;
-                                        temp[x + 3, y].animal.position = (x + 3, y);
-                                        temp[x, y].animal = null;
-                                        papans.Add(temp);
-                                    }
-                                    else
-                                    if (temp[x + 3, y].animal.player != myAnimal.player && temp[x + 3, y].animal.strength < myAnimal.strength) {
+                if (cek.animal == null) {
+                    if (cek.isWater) { //jika tujuan itu air
+                        if (myAnimal.strength == 0) {
+                            cek.animal = temp[x, y].animal;
+                            cek.animal.position = (x+1, y );
+                            temp[x, y].animal = null;
+                            papans.Add(temp);
+                        }
+                        else if (myAnimal.strength == 6 || myAnimal.strength == 5) {
+                            if (temp[x + 2, y].animal == null) {
+                                if (temp[x + 3, y].animal == null) {
+                                    temp[x + 3, y].animal = temp[x, y].animal;
+                                    temp[x + 3, y].animal.position = (x + 3, y);
+                                    temp[x, y].animal = null;
+                                    papans.Add(temp);
+                                }
+                                else if (temp[x + 3, y].animal.player != myAnimal.player && temp[x + 3, y].animal.strength < myAnimal.strength) {
                                         temp[x + 3, y].removeAnimal();
                                         temp[x + 3, y].animal = temp[x, y].animal;
                                         temp[x + 3, y].animal.position = (x + 3, y);
                                         temp[x, y].animal = null;
                                         papans.Add(temp);
-                                    }
                                 }
                             }
                         }
                     }
                     else {
-                        if (myAnimal.player != cek.animal.player && cek.isWater == temp[x, y].isWater) {
-                            if (cek.isTrap && cek.trapOwner == myAnimal.player) {
-                                cek.removeAnimal();
-                                cek.animal = myAnimal;
-                                temp[x, y].animal = null;
-                                myAnimal.position = CoordsOf(temp, cek).ToValueTuple();
-                                papans.Add(temp);
-                            }
-                            else if (myAnimal.strength == 0 && cek.animal.strength == 7) {
-                                cek.removeAnimal();
-                                cek.animal = temp[x, y].animal;
-                                cek.animal.position = (x + 1, y);
-                                temp[x, y].animal = null;
-                                papans.Add(temp);
-                            }
-                            else if (myAnimal.strength == 7 && cek.animal.strength == 0) {
-                                //gaboleh gajah makan tikus
-                            }
-                            else if (cek.animal.strength <= myAnimal.strength) {
-                                cek.removeAnimal();
-                                cek.animal = temp[x, y].animal;
-                                cek.animal.position = (x + 1, y);
-                                temp[x, y].animal = null;
-                                papans.Add(temp);
-                            }
+                        cek.animal = temp[x, y].animal;
+                        cek.animal.position = (x + 1, y);
+                        temp[x, y].animal = null;
+                        papans.Add(temp);
+                    }
+                }
+                else {
+                    if (myAnimal.player != cek.animal.player && cek.isWater == temp[x, y].isWater) {
+                        if (cek.isTrap && cek.trapOwner == myAnimal.player) {
+                            cek.removeAnimal();
+                            cek.animal = temp[x, y].animal;
+                            temp[x, y].animal = null;
+                            cek.animal.position = (x + 1, y);
+                            papans.Add(temp);
+                        }
+                        else if (myAnimal.strength == 0 && cek.animal.strength == 7) {
+                            cek.removeAnimal();
+                            cek.animal = temp[x, y].animal;
+                            cek.animal.position = (x + 1, y);
+                            temp[x, y].animal = null;
+                            papans.Add(temp);
+                        }
+                        else if (myAnimal.strength == 7 && cek.animal.strength == 0) {
+                            //gaboleh gajah makan tikus
+                        }
+                        else if (cek.animal.strength <= myAnimal.strength) {
+                            cek.removeAnimal();
+                            cek.animal = temp[x, y].animal;
+                            cek.animal.position = (x + 1, y);
+                            temp[x, y].animal = null;
+                            papans.Add(temp);
                         }
                     }
                 }
@@ -681,64 +710,69 @@ namespace AnimalChess {
             Box cek = temp[x, y + 1];
             if (cek.isDen && cek.denOwner == myAnimal.player) { /*MessageBox.Show("den sendiri bott");*/ }
             else {
-                if (cek.animal == null && !cek.isWater) {
-                    cek.animal = temp[x, y].animal;
-                    cek.animal.position = (x, y + 1);
-                    temp[x, y].animal = null;
-                    papans.Add(temp);
-                }
-                else {
-                    if (cek.animal == null) {
-                        if (cek.isWater) {
-                            if (myAnimal.strength == 6 || myAnimal.strength == 5) {
-                                if (temp[x, y + 2].animal == null) {
-                                    if (temp[x, y + 3].animal == null) {
-                                        if (temp[x, y + 4].animal == null) {
-                                            temp[x, y + 4].animal = temp[x, y].animal;
-                                            temp[x, y + 4].animal.position = (x, y + 4);
-                                            temp[x, y].animal = null;
-                                            papans.Add(temp);
-                                        }
-                                        else if (temp[x, y + 4].animal.player != myAnimal.player && temp[x, y + 4].animal.strength < myAnimal.strength) {
-                                            temp[x, y + 4].removeAnimal();
-                                            temp[x, y + 4].animal = temp[x, y].animal;
-                                            temp[x, y + 4].animal.position = (x, y + 4);
-                                            temp[x, y].animal = null;
-                                            papans.Add(temp);
-                                        }
+                if (cek.animal == null) { //tidak ada hewan di tempat tujuan
+                    if (cek.isWater) { //jika tujuan itu air
+                        if (myAnimal.strength == 0) {
+                            cek.animal = temp[x, y].animal;
+                            cek.animal.position = (x, y + 1);
+                            temp[x, y].animal = null;
+                            papans.Add(temp);
+                        }
+                        else if (myAnimal.strength == 6 || myAnimal.strength == 5) {
+                            if (temp[x, y + 2].animal == null) {
+                                if (temp[x, y + 3].animal == null) {
+                                    if (temp[x, y + 4].animal == null) {
+                                        temp[x, y + 4].animal = temp[x, y].animal;
+                                        temp[x, y + 4].animal.position = (x, y + 4);
+                                        temp[x, y].animal = null;
+                                        papans.Add(temp);
+                                    }
+                                    else if (temp[x, y + 4].animal.player != myAnimal.player && temp[x, y + 4].animal.strength < myAnimal.strength) {
+                                        temp[x, y + 4].removeAnimal();
+                                        temp[x, y + 4].animal = temp[x, y].animal;
+                                        temp[x, y + 4].animal.position = (x, y + 4);
+                                        temp[x, y].animal = null;
+                                        papans.Add(temp);
                                     }
                                 }
                             }
-                        } else {
-                            MessageBox.Show("Test");
                         }
                     }
                     else {
-                        if (myAnimal.player != cek.animal.player && cek.isWater == temp[x, y].isWater) {
-                            if (cek.isTrap && cek.trapOwner == myAnimal.player) {
-                                cek.removeAnimal();
-                                cek.animal = myAnimal;
-                                temp[x, y].animal = null;
-                                myAnimal.position = CoordsOf(temp, cek).ToValueTuple();
-                                papans.Add(temp);
-                            }
-                            else if (myAnimal.strength == 0 && cek.animal.strength == 7) {
-                                cek.removeAnimal();
-                                cek.animal = temp[x, y].animal;
-                                cek.animal.position = (x, y + 1);
-                                temp[x, y].animal = null;
-                                papans.Add(temp);
-                            }
-                            else if (myAnimal.strength == 7 && cek.animal.strength == 0) {
-                                //gaboleh gajah makan tikus
-                            }
-                            else if (cek.animal.strength <= myAnimal.strength) {
-                                cek.removeAnimal();
-                                cek.animal = temp[x, y].animal;
-                                cek.animal.position = (x, y + 1);
-                                temp[x, y].animal = null;
-                                papans.Add(temp);
-                            }
+                        cek.animal = temp[x, y].animal;
+                        cek.animal.position = (x, y + 1);
+                        temp[x, y].animal = null;
+                        papans.Add(temp);
+                    }
+                }
+                else { //ada hewan di tempat tujuan
+                    if (myAnimal.player != cek.animal.player && cek.isWater == temp[x, y].isWater) {
+                        if (cek.isTrap && cek.trapOwner == myAnimal.player) {
+                            cek.removeAnimal();
+                            cek.animal = temp[x, y].animal;
+                            temp[x, y].animal = null;
+                            myAnimal.position = CoordsOf(temp, cek).ToValueTuple();
+                            papans.Add(temp);
+                        }
+                        else if (myAnimal.strength == 0 && cek.animal.strength == 7) {
+                            cek.removeAnimal();
+                            cek.animal = temp[x, y].animal;
+                            cek.animal.position = (x, y + 1);
+                            temp[x, y].animal = null;
+                            papans.Add(temp);
+                        }
+                        else if (myAnimal.strength == 7 && cek.animal.strength == 0) { //gaboleh gajah makan tikus
+                            Console.WriteLine("nda boleh");
+                        }
+                        else if (cek.animal.strength <= myAnimal.strength) {
+                            cek.removeAnimal();
+                            cek.animal = temp[x, y].animal;
+                            cek.animal.position = (x, y + 1);
+                            temp[x, y].animal = null;
+                            papans.Add(temp);
+                        } 
+                        else {
+                            Console.WriteLine("nda boleh");
                         }
                     }
                 }
@@ -753,6 +787,7 @@ namespace AnimalChess {
                     cek.animal = temp[x, y].animal;
                     cek.animal.position = (x, y - 1);
                     temp[x, y].animal = null;
+                    //papans.Add(temp);
                     papans.Add(temp);
                 }
                 else {
@@ -776,14 +811,26 @@ namespace AnimalChess {
                                         }
                                     }
                                 }
+                            } else if (myAnimal.strength == 0) {
+                                cek.animal = temp[x, y].animal;
+                                cek.animal.position = (x, y - 1);
+                                temp[x, y].animal = null;
+                                papans.Add(temp);
                             }
+                        } 
+                        else {
+                            cek.animal = temp[x, y].animal;
+                            cek.animal.position = (x, y - 1);
+                            temp[x, y].animal = null;
+                            //papans.Add(temp);
+                            papans.Add(temp);
                         }
                     }
                     else {
                         if (myAnimal.player != cek.animal.player && cek.isWater == temp[x, y].isWater) {
                             if (cek.isTrap && cek.trapOwner == myAnimal.player) {
                                 cek.removeAnimal();
-                                cek.animal = myAnimal;
+                                cek.animal = temp[x, y].animal;
                                 temp[x, y].animal = null;
                                 myAnimal.position = CoordsOf(temp, cek).ToValueTuple();
                                 papans.Add(temp);
@@ -824,14 +871,17 @@ namespace AnimalChess {
                     tee.isWater = current.isWater;
                     tee.denOwner = current.denOwner;
                     tee.trapOwner = current.trapOwner;
-                    Box.Piece animtee = null;
                     if (current.animal != null) {
                         int str, player;
                         str = current.animal.strength; player = current.animal.player;
-                        animtee = new Box.Piece(str, player);
-                        animtee.isAlive = current.animal.isAlive;
-                        animtee.position = ((int)current.animal.position.Item1, (int)current.animal.position.Item2);
+                        Box.Piece animtee = new Box.Piece(str, player) {
+                            isAlive = current.animal.isAlive,
+                            position = ((int)current.animal.position.Item1, (int)current.animal.position.Item2)
+                        };
                         tee.animal = animtee;
+                    } 
+                    else {
+                        tee.animal = null;
                     }
                     clones[i, j] = tee;
                 }
@@ -891,7 +941,7 @@ namespace AnimalChess {
             //MessageBox.Show(ai.giliran + "");
 
             //call minimax
-            int depth = 3;
+            int depth = DEPTH;
             int playerKe = ai.giliran;
             Box[,] papanBaru = DeepCopy(papan);
             (Move, int) m = MiniMax(papanBaru, depth, playerKe, new Move(papanBaru), int.MinValue, int.MaxValue);
@@ -899,19 +949,6 @@ namespace AnimalChess {
             Move t = m.Item1;
             //if (m.Item2 == int.MaxValue) MessageBox.Show("SAMPAI");
             while (t.next.next != null) {
-                //Console.WriteLine("MAPPPPP");
-                //for (int y = 0; y < 9; y++) {
-                //    for (int x = 0; x < 7; x++) {
-                //        Box current = t.currentMap[x, y];
-                //        string character = ".";
-                //        if (current.isDen) character = "d";
-                //        if (current.isTrap) character = "t";
-                //        if (current.isWater) character = "w";
-                //        if (current.animal != null) character = current.animal.strength.ToString();
-                //        Console.Write(character);
-                //    }
-                //    Console.WriteLine();
-                //}
                 if (t.next != null) {
                     t = t.next;
                 }
@@ -929,7 +966,6 @@ namespace AnimalChess {
 
         private void redrawToolStripMenuItem_Click(object sender, EventArgs e) {
             panelGame.Invalidate();
-            
         }
     }
     class ComputerPlayer {
