@@ -26,6 +26,17 @@ namespace AnimalChess {
             override public string ToString() {
                 return this.nama + " - " + this.position + " - "+ player;
             }
+
+            public int getValue() {
+                switch (strength) {
+                    case 0: return 100;
+                    case 7: return 100;
+                    case 5:
+                    case 6: return 75;
+                    default:
+                        return 10 * strength;
+                }
+            }
         }
 
         public Piece animal;
