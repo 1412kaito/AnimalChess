@@ -430,12 +430,7 @@ namespace AnimalChess {
             displayPapan();
         }
 
-        Random r = new Random();
-        //sisa move, maxim atau minim
-
-
         //call MiniMax(map, 3, giliran, moves, int.MinValue, int.MaxValue)
-
         private (Move, int) MiniMax(Box[,] peta, int depth, int playerSekarang, Move sebelumnya, int alfa, int beta) {
             callCounter++;
             if (depth == 0) {
