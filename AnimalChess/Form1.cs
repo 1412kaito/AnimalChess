@@ -589,7 +589,8 @@ namespace AnimalChess {
                             temp[x, y].animal = null;
                             cek.animal.position = (x - 1, y);
                             papans.Add(temp);
-                        } else {
+                        } 
+                        else {
                             //Console.WriteLine(myAnimal.strength);
                         }
                     }
