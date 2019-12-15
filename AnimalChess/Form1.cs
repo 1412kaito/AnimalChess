@@ -636,16 +636,15 @@ namespace AnimalChess {
             Box cek = temp[x + 1, y];
             if (cek.isDen && cek.denOwner == myAnimal.player) { /*MessageBox.Show("den sendiri right"); */}
             else {
-                if (cek.animal == null && !cek.isWater) {
+                if (cek.animal == null) {
+                    if (cek.isWater) { //jika tujuan itu air
+                        if (myAnimal.strength == 0) {
                     cek.animal = temp[x, y].animal;
-                    cek.animal.position = (x + 1, y);
+                            cek.animal.position = (x+1, y );
                     temp[x, y].animal = null;
                     papans.Add(temp);
                 }
-                else {
-                    if (cek.animal == null) {
-                        if (cek.isWater) {
-                            if (myAnimal.strength == 6 || myAnimal.strength == 5) {
+                        else if (myAnimal.strength == 6 || myAnimal.strength == 5) {
                                 if (temp[x + 2, y].animal == null) {
                                     if (temp[x + 3, y].animal == null) {
                                         temp[x + 3, y].animal = temp[x, y].animal;
@@ -653,8 +652,7 @@ namespace AnimalChess {
                                         temp[x, y].animal = null;
                                         papans.Add(temp);
                                     }
-                                    else
-                                    if (temp[x + 3, y].animal.player != myAnimal.player && temp[x + 3, y].animal.strength < myAnimal.strength) {
+                                else if (temp[x + 3, y].animal.player != myAnimal.player && temp[x + 3, y].animal.strength < myAnimal.strength) {
                                         temp[x + 3, y].removeAnimal();
                                         temp[x + 3, y].animal = temp[x, y].animal;
                                         temp[x + 3, y].animal.position = (x + 3, y);
@@ -664,14 +662,20 @@ namespace AnimalChess {
                                 }
                             }
                         }
+                    else {
+                        cek.animal = temp[x, y].animal;
+                        cek.animal.position = (x + 1, y);
+                        temp[x, y].animal = null;
+                        papans.Add(temp);
+                    }
                     }
                     else {
                         if (myAnimal.player != cek.animal.player && cek.isWater == temp[x, y].isWater) {
                             if (cek.isTrap && cek.trapOwner == myAnimal.player) {
                                 cek.removeAnimal();
-                                cek.animal = myAnimal;
+                            cek.animal = temp[x, y].animal;
                                 temp[x, y].animal = null;
-                                myAnimal.position = CoordsOf(temp, cek).ToValueTuple();
+                            cek.animal.position = (x + 1, y);
                                 papans.Add(temp);
                             }
                             else if (myAnimal.strength == 0 && cek.animal.strength == 7) {
@@ -695,7 +699,6 @@ namespace AnimalChess {
                     }
                 }
             }
-        }
 
         private void cobaGerakKeBawah(List<Box[,]> papans, Box.Piece myAnimal, Box[,] temp, int x, int y) {
             Box cek = temp[x, y + 1];
