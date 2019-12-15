@@ -17,6 +17,8 @@ namespace AnimalChess {
         private int giliran = 1;
         private Box first;
         private Box.Piece clicked = null;
+        private int callCounter = 0;
+        private readonly int DEPTH = 1;
         //private Dictionary<string, Box> around;
 
         private const int BOX_SIZE = 75;
@@ -102,6 +104,20 @@ namespace AnimalChess {
             papan[6, 8].animal.position = (6, 8);
             papan[0, 8].animal.position = (0, 8);
             papan[6, 6].animal.position = (6, 6);
+
+
+            //debugging
+            //papan[5,6].animal = new Box.Piece(0, 1);
+
+
+            //papan[5, 6].animal.position = (5, 6);
+
+
+            //papan[5, 7].animal = new Box.Piece(5, 2);
+            //papan[4, 6].animal = new Box.Piece(5, 2);
+
+            //papan[4, 6].animal.position = (4, 6);
+            //papan[5, 7].animal.position = (5, 7);
 
             displayPapan();
         }
@@ -206,6 +222,7 @@ namespace AnimalChess {
                                                     clicked = null;
                                                 }
                                                 gantiGiliran(sender, e);
+                                                }
                                                 break;
                                             case "bawah":
                                                 if (bisaNyebrangKeBawah(cX, cY, second)) {
@@ -215,8 +232,8 @@ namespace AnimalChess {
                                                     clicked.position = (cX, cY + 3);
                                                     //MessageBox.Show(clicked.position.ToString());
                                                     clicked = null;
-                                                }
                                                 gantiGiliran(sender, e);
+                                                }
                                                 break;
                                             case "kiri":
                                                 if (bisaNyebrangKeKiri(cX, cY, second)) {
@@ -225,8 +242,9 @@ namespace AnimalChess {
                                                     papan[cX - 2, cY].animal = clicked;
                                                     papan[cX - 2, cY].animal.position = (cX - 2, cY);
                                                     clicked = null;
-                                                }
                                                 gantiGiliran(sender, e);
+
+                                                }
                                                 break;
                                             case "kanan":
                                                 if (bisaNyebrangKeKanan(cX, cY, second)) {
@@ -236,7 +254,6 @@ namespace AnimalChess {
                                                     papan[cX + 2, cY].animal.position = (cX + 2, cY);
                                                     //MessageBox.Show(clicked.position.ToString());
                                                     clicked = null;
-                                                }
                                                 gantiGiliran(sender, e);
                                                 break;
                                         }
@@ -252,6 +269,7 @@ namespace AnimalChess {
                                     second.animal.position = CoordsOf(papan, second).ToValueTuple();
                                 }
                                 gantiGiliran(sender, e);
+                                }
                                 break;
                         }
                         displayPapan();
@@ -377,27 +395,21 @@ namespace AnimalChess {
 
             if (giliran == ai.giliran) {
                 //call minimax
-                int depth = 3;
+                int depth = DEPTH;
                 int playerKe = ai.giliran;
                 Box[,] papanBaru = DeepCopy(papan);
+                System.Diagnostics.Stopwatch stopwatch = new Stopwatch();
+                callCounter = 0;
+                Console.WriteLine("START!");
+                stopwatch.Start();
                 (Move, int) m = MiniMax(papanBaru, depth, playerKe, new Move(papanBaru), int.MinValue, int.MaxValue);
+                stopwatch.Stop();
                 //do best move
                 Move t = m.Item1;
                 //if (m.Item2 == int.MaxValue) MessageBox.Show("SAMPAI");
+                if (t.next != null) {
                 while (t.next.next != null) {
-                    //Console.WriteLine("MAPPPPP");
-                    //for (int y = 0; y < 9; y++) {
-                    //    for (int x = 0; x < 7; x++) {
-                    //        Box current = t.currentMap[x, y];
-                    //        string character = ".";
-                    //        if (current.isDen) character = "d";
-                    //        if (current.isTrap) character = "t";
-                    //        if (current.isWater) character = "w";
-                    //        if (current.animal != null) character = current.animal.strength.ToString();
-                    //        Console.Write(character);
-                    //    }
-                    //    Console.WriteLine();
-                    //}
+                        Console.WriteLine(t.currentMap);
                     if (t.next != null) {
                         t = t.next;
                     }
@@ -405,12 +417,15 @@ namespace AnimalChess {
                         break;
                     }
                 }
+                }
                 if (t != null) {
                     papan = t.currentMap;
                     ambilPiecesYangMasihHidup();
                     giliran %= 2;
                     giliran++;
                 }
+                Console.WriteLine("TIME:" +stopwatch.Elapsed);
+                Console.WriteLine("CALL COUNT:" +callCounter);
             }
             displayPapan();
         }
@@ -422,6 +437,7 @@ namespace AnimalChess {
         //call MiniMax(map, 3, giliran, moves, int.MinValue, int.MaxValue)
 
         private (Move, int) MiniMax(Box[,] peta, int depth, int playerSekarang, Move sebelumnya, int alfa, int beta) {
+            callCounter++;
             if (depth == 0) {
                 int value = 0;
 
@@ -472,13 +488,12 @@ namespace AnimalChess {
                 return (sebelumnya, value);
             }
             else {
-
-                List<Box.Piece> akanGerak = new List<Box.Piece>(); int ctr = 0;
+                List<Box.Piece> akanGerak = new List<Box.Piece>(); 
                 for (int y = 0; y < 9; y++) {
                     for (int x = 0; x < 7; x++) {
                         Box petak = peta[x, y];
                         if (petak.animal != null) {
-                            if (petak.animal.isAlive && petak.animal.player == playerSekarang && petak.animal.position.Equals(CoordsOf(peta, petak).ToValueTuple())) {
+                            if (petak.animal.isAlive && petak.animal.player == playerSekarang) {
                                 akanGerak.Add(petak.animal);
                                 ++ctr;
                             }
@@ -487,23 +502,22 @@ namespace AnimalChess {
                 }
 
                 List<Box[,]> papans = new List<Box[,]>();
-                foreach (Box.Piece myAnimal in akanGerak) {
-                    var possibleMoves = AtasBawahKiriKanan(myAnimal.position, peta);
+                foreach (Box.Piece currentAnimal in akanGerak) {
+                    var possibleMoves = AtasBawahKiriKanan(currentAnimal.position, peta);
                     foreach (var move in possibleMoves) {
-                        Box[,] temp = DeepCopy(peta);
-                        int x = myAnimal.position.Item1;
-                        int y = myAnimal.position.Item2;
-                        if (move.Key.ToLowerInvariant().Equals("atas".ToLowerInvariant())) {
-                            cobaGerakKeAtas(papans, myAnimal, temp, x, y);
+                        int x = currentAnimal.position.Item1;
+                        int y = currentAnimal.position.Item2;
+                        if (move.Key.ToLowerInvariant().Equals("bawah".ToLowerInvariant())) {
+                            cobaGerakKeBawah(papans, currentAnimal, DeepCopy(peta), x, y);
                         }
                         else if (move.Key.ToLowerInvariant().Equals("kanan".ToLowerInvariant())) {
-                            cobaGerakKeKanan(papans, myAnimal, temp, x, y);
+                            cobaGerakKeKanan(papans, currentAnimal, DeepCopy(peta), x, y);
                         }
-                        else if (move.Key.ToLowerInvariant().Equals("bawah".ToLowerInvariant())) {
-                            cobaGerakKeBawah(papans, myAnimal, temp, x, y);
+                        else if (move.Key.ToLowerInvariant().Equals("atas".ToLowerInvariant())) {
+                            cobaGerakKeAtas(papans, currentAnimal, DeepCopy(peta), x, y);
                         }
                         else if (move.Key.ToLowerInvariant().Equals("kiri".ToLowerInvariant())) {
-                            cobaGerakKeKiri(papans, myAnimal, temp, x, y);
+                            cobaGerakKeKiri(papans, currentAnimal, DeepCopy(peta), x, y);
                         }
 
                     }
