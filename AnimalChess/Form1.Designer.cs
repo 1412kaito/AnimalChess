@@ -38,7 +38,7 @@
             this.panelGame.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelGame.Location = new System.Drawing.Point(0, 24);
             this.panelGame.Name = "panelGame";
-            this.panelGame.Size = new System.Drawing.Size(800, 860);
+            this.panelGame.Size = new System.Drawing.Size(800, 725);
             this.panelGame.TabIndex = 0;
             this.panelGame.Paint += new System.Windows.Forms.PaintEventHandler(this.panelGame_Paint);
             this.panelGame.MouseClick += new System.Windows.Forms.MouseEventHandler(this.panelGame_MouseClick);
@@ -95,7 +95,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 884);
+            this.ClientSize = new System.Drawing.Size(800, 749);
             this.Controls.Add(this.panelGame);
             this.Controls.Add(this.menuStrip1);
             this.Name = "Form1";

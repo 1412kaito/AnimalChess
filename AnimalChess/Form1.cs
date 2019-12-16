@@ -18,7 +18,7 @@ namespace AnimalChess {
         private Box first;
         private Box.Piece clicked = null;
         private int callCounter = 0;
-        private readonly int DEPTH = 1;
+        private readonly int DEPTH = 4;
         //private Dictionary<string, Box> around;
 
         private const int BOX_SIZE = 75;
@@ -420,6 +420,17 @@ namespace AnimalChess {
                 }
                 Console.WriteLine("TIME:" +stopwatch.Elapsed);
                 Console.WriteLine("CALL COUNT:" +callCounter);
+
+                for (int i = 0; i < ai.pieces.Count; i++)
+                {
+                    if(ai.pieces[i].position == (3, 0))
+                    {
+                        MessageBox.Show("AI WIN!");
+                    }else if (ai.pieces[i].position == (3, 8))
+                    {
+                        MessageBox.Show("AI WIN!");
+                    }
+                }
             }
             displayPapan();
         }
@@ -427,22 +438,53 @@ namespace AnimalChess {
         //call MiniMax(map, 3, giliran, moves, int.MinValue, int.MaxValue)
         private (Move, int) MiniMax(Box[,] peta, int depth, int playerSekarang, Move sebelumnya, int alfa, int beta) {
             callCounter++;
+            if (sebelumnya.currentMap[3,0].animal != null)
+            {
+                if (giliran == sebelumnya.currentMap[3, 0].denOwner)
+                {
+                    return (sebelumnya, int.MinValue);
+                }
+                else
+                {
+                    return (sebelumnya, int.MaxValue);
+
+                }
+            }
+            else if(sebelumnya.currentMap[3, 8].animal != null)
+            {
+                if (giliran == sebelumnya.currentMap[3, 8].denOwner)
+                {
+                    return (sebelumnya, int.MinValue);
+                }
+                else
+                {
+                    return (sebelumnya, int.MaxValue);
+
+                }
+            }
+            //hitung SBE
             if (depth == 0) {
                 int value = 0;
 
                 Box[,] copyPeta = sebelumnya.currentMap;
                 List<Box.Piece> myPieces, enemyPieces;
-                myPieces = new List<Box.Piece>(); enemyPieces = new List<Box.Piece>();
+                myPieces = new List<Box.Piece>();
+                enemyPieces = new List<Box.Piece>();
 
-                for (int y = 0; y < 9; y++) {
-                    for (int x = 0; x < 7; x++) {
+                for (int y = 0; y < 9; y++)
+                {
+                    for (int x = 0; x < 7; x++)
+                    {
                         Box currentPiece = copyPeta[x, y];
-                        if (currentPiece.animal != null) {
-                            if (currentPiece.animal.player == giliran) {
+                        if (currentPiece.animal != null)
+                        {
+                            if (currentPiece.animal.player == giliran)
+                            {
                                 value += currentPiece.animal.getValue();
                                 myPieces.Add(currentPiece.animal);
                             }
-                            else {
+                            else
+                            {
                                 value -= currentPiece.animal.getValue();
                                 enemyPieces.Add(currentPiece.animal);
                             }
@@ -450,38 +492,43 @@ namespace AnimalChess {
                     }
                 }
 
-                value += ((myPieces.Count - enemyPieces.Count)*50);
+                value += ((myPieces.Count - enemyPieces.Count) * 50);
 
                 int jarakX = int.MaxValue, jarakY = int.MaxValue;
                 int distance = int.MaxValue;
-                foreach (Box.Piece item in myPieces) {
+                foreach (Box.Piece item in myPieces)
+                {
 
                     jarakX = 3 - item.position.Item1;
                     jarakX = Math.Abs(jarakX);
-                    if (ai.giliran == 1) {
+                    if (ai.giliran == 1)
+                    {
                         jarakY = Math.Abs(8 - item.position.Item2);
                     }
-                    else {
+                    else
+                    {
                         jarakY = Math.Abs(0 - item.position.Item2);
                     }
 
-                    if (jarakY == jarakX && jarakX == 0) {
+                    if (jarakY == jarakX && jarakX == 0)
+                    {
                         value = int.MaxValue;
                         return (sebelumnya, value);
                     }
-                    else {
+                    else
+                    {
                         int currentDistance = jarakX + jarakY;
-                        if (currentDistance < distance) {
+                        if (currentDistance < distance)
+                        {
                             distance = currentDistance;
+                        }
                     }
                 }
-                }
-
                 value += ((distance * -1) * 25);
-
                 return (sebelumnya, value);
             }
-            else {
+            else
+            {
                 List<Box.Piece> akanGerak = new List<Box.Piece>(); 
                 for (int y = 0; y < 9; y++) {
                     for (int x = 0; x < 7; x++) {
