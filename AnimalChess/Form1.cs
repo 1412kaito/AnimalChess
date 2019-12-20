@@ -400,20 +400,14 @@ namespace AnimalChess {
                 stopwatch.Stop();
                 //do best move
                 Move t = m.Item1;
+                Move prev = null;
                 //if (m.Item2 == int.MaxValue) MessageBox.Show("SAMPAI");
-                if (t.next != null) {
-                while (t.next.next != null) {
-                        Console.WriteLine(t.currentMap);
-                    if (t.next != null) {
-                        t = t.next;
-                    }
-                    else {
-                        break;
-                    }
+                while (t.next != null) {
+                    prev = t;
+                    t = t.next;
                 }
-                }
-                if (t != null) {
-                    papan = t.currentMap;
+                if (prev != null) {
+                    papan = prev.currentMap;
                     ambilPiecesYangMasihHidup();
                     giliran %= 2;
                     giliran++;
@@ -478,15 +472,15 @@ namespace AnimalChess {
                         Box currentPiece = copyPeta[x, y];
                         if (currentPiece.animal != null)
                         {
-                            if (currentPiece.animal.player == giliran)
-                            {
-                                value += currentPiece.animal.getValue();
-                                myPieces.Add(currentPiece.animal);
-                            }
-                            else
-                            {
-                                value -= currentPiece.animal.getValue();
-                                enemyPieces.Add(currentPiece.animal);
+                            if (currentPiece.animal.isAlive) {
+                                if (currentPiece.animal.player == giliran) {
+                                    value += currentPiece.animal.getValue();
+                                    myPieces.Add(currentPiece.animal);
+                                }
+                                else {
+                                    value -= currentPiece.animal.getValue();
+                                    enemyPieces.Add(currentPiece.animal);
+                                }
                             }
                         }
                     }
